@@ -1,0 +1,12 @@
+*.pyo
+*.idea*
+*.pyc
+src/*.idea*
+src/fixtures
+src/logs/*
+src/.coverage
+*.sqlite3
+*.dump
+src/staticfiles
+node_modules/*
+src/job_aggregator_xmls/*.xml
