@@ -21,6 +21,7 @@ For a client, there can be policy at multiple levels viz. Global-limit, Limit-at
 (e.g. HTTP-METHOD / API-ENDPOINT):
 
 Rate-limit Config for individual client
+```
 	client: <CLIENT-ID>
 	limit:
 		SEC -> int (Optional)
@@ -59,7 +60,7 @@ Rate-limit Config for individual client
 					HOUR -> int (Optional)
 					WEEK -> int (Optional)
 					MONTH  -> int (Optional)
-
+```
 The configuration for each client is loaded in the redis with appropriate key.
 
 Every request must have `HTTP_AUTHORIZATION=<client_id>` in http-header.
