@@ -1,13 +1,13 @@
 # Synopsis
  - Distributed-Rate-Limiting in Django App
-A basic Django project setup to illustrate Distributed-Rate-Limiting using Django-middleware.
+ - A basic Django project setup to illustrate Distributed-Rate-Limiting using Django-middleware.
 The core components include a middleware and a RateLimitPolicyChecker  
 ```
 rate_limit.middleware.request_rate_limit.RequestRateLimitingMiddleware
 rate_limit.middleware.rate_limit_policy.RateLimitPolicy
 ```
 
-This middleware and policy can be used by any Distributed django app.  
+This middleware and policy can be used in any Distributed django app.  
 
 ## Getting started
 1. Setup virtualenv for a django project. `virtualenv -p python3 <venv-name>`
@@ -22,7 +22,7 @@ This middleware and policy can be used by any Distributed django app.
 	 load_policy_in_redis()	 
 	 ```
 
-## Rate Limiting configuration for a client
+### Configuration for a client
 For a client, Rate Limiting policy can be at multiple levels viz. Global-limit, Limit-at-Specialization-levels  (e.g. HTTP-METHOD / API-ENDPOINT).
 And for each level, there can be multiple time-windows among `SEC, MIN, HOUR, WEEK, MONTH` 
 
@@ -68,7 +68,7 @@ e.g
 					MONTH  -> int (Optional)
 ```
 
-## Implementation Logic
+### Implementation Logic
 It uses Redis for rate-limiting requests from client. 
 All apps/services in the distributed cluster points to same redis DB. 
 
