@@ -1,9 +1,7 @@
 __author__ = 'sanjeev'
 
 import json
-
 from django.http import HttpResponse
-
 from rate_limit.middleware.rate_limit_policy import RateLimitPolicy
 
 
@@ -38,11 +36,12 @@ class RequestRateLimitingMiddleware:
         if not client_id:
             return self.error_response(self.CLIENT_NOT_REGISTERED_RESPONSE_CODE)
         policy = RateLimitPolicy()
+        client_id = client_id.upper()
         if not policy.check_policy_exists(client_id):
             return self.error_response(self.CLIENT_NOT_REGISTERED_RESPONSE_CODE)
         #
-        http_method = request.method
-        url = request.path
+        http_method = request.method.upper()
+        url = request.path.upper()
         limit_reached = policy.check_policy(client_id, http_method, url)
         if limit_reached:
             return self.error_response(self.TOO_MANY_REQUESTS_RESPONSE_CODE)

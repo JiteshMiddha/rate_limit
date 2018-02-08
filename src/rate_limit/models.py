@@ -53,28 +53,28 @@ class ClientRateLimitConfig(models.Model):
         all_configs = {}
         for cl_config in all_client_configs:
             # Make final configuration key-value pair to store in REDIS
-            client_id = cl_config['client_id'].upper()
-            configs = cl_config['config']
+            client_id = cl_config[0].upper()
+            configs = cl_config[1]
             final_config = {}
             for conf in configs:
                 if conf["specialization"] == "GLOBAL":
                     db_cfg = conf["limit"][0]["limit"]
                     f_conf = {}
-                    [f_conf.update(k, v) for k, v in db_cfg.items() if (v is not None and v > 0)]
+                    [f_conf.update({k: v}) for k, v in db_cfg.items() if (v is not None and v > 0)]
                     key_name = "{0}:S:GLOBAL".format(client_id)
                     final_config[key_name] = f_conf
                 if conf["specialization"] == "METHOD":
                     for _ in conf["limit"]:
                         db_cfg = _["limit"]
                         f_conf = {}
-                        [f_conf.update(k, v) for k, v in db_cfg.items() if (v is not None and v > 0)]
+                        [f_conf.update({k: v}) for k, v in db_cfg.items() if (v is not None and v > 0)]
                         key_name = "{0}:S:METHOD:{1}".format(client_id, _["http_method"].upper())
                         final_config[key_name] = f_conf
                 if conf["specialization"] == "API":
                     for _ in conf["limit"]:
                         db_cfg = _["limit"]
                         f_conf = {}
-                        [f_conf.update(k, v) for k, v in db_cfg.items() if (v is not None and v > 0)]
+                        [f_conf.update({k: v}) for k, v in db_cfg.items() if (v is not None and v > 0)]
                         key_name = "{0}:S:API:{1}".format(client_id, _["end_point"].upper())
                         final_config[key_name] = f_conf
             all_configs["client_id"] = final_config
@@ -88,7 +88,7 @@ class ClientRateLimitConfig(models.Model):
             return
         with transaction.atomic():
             for d in rate_limit_config:
-                client_id = d["client_id"]
+                client_id = d["client_id"].upper()
                 if d.get("global_limit"):
                     ins = cls(client_id=client_id, specialization=SpecializationType.GLOBAL)
                     g_limit = d["global_limit"]
@@ -96,13 +96,13 @@ class ClientRateLimitConfig(models.Model):
                     ins.save()
                 if d.get("method_limits"):
                     for met in d["method_limits"]:
-                        ins = cls(client_id=client_id, specialization=SpecializationType.METHOD, http_method=met["http_method"])
+                        ins = cls(client_id=client_id, specialization=SpecializationType.METHOD, http_method=met["http_method"].upper())
                         limit = met["limit"]
                         [setattr(ins, window_and_respective_column[k], int(v)) for k, v in limit.items() if v]
                         ins.save()
                 if d.get("end_point"):
                     for met in d["end_point"]:
-                        ins = cls(client_id=client_id, specialization=SpecializationType.API, end_point=met["url"])
+                        ins = cls(client_id=client_id, specialization=SpecializationType.API, end_point=met["url"].upper())
                         limit = met["limit"]
                         [setattr(ins, window_and_respective_column[k], int(v)) for k, v in limit.items() if v]
                         ins.save()

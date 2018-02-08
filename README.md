@@ -11,6 +11,17 @@ This middleware and policy can be used by any Distributed django app.
 2. Setup virtualenv for django project. `virtualenv -p <python-3-path> <venv-name>`
 3. Install required packages in the virtualenv, using `pip install -r requirements.txt`
 
+## Sample configuration load
+1. Load sample rate-limit-configuration in DB (Postgres)
+ ```
+ from rate_limit.script import create_sample_rate_limit_config_in_db, load_policy_in_redis
+ create_sample_rate_limit_config_in_db()
+ ```
+
+2. Fetch the configuration from Postgres, format it then load it in redis.
+ ```
+ load_policy_in_redis()
+ ```
 
 # How It works
 It uses Redis for managing the rate-limit. This redis db is pointed by all apps in the 

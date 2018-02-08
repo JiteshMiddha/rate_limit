@@ -92,21 +92,21 @@ class RateLimitPolicy:
         # Check if global rate limit has crossed
         for index, measure in enumerate(self.MEASURE_UNIT, 0):
             if not limit_crossed:
-                limit_crossed = (global_limit.get(measure) is not None and curr_counts[index] > global_limit[measure])
+                limit_crossed = (global_limit.get(measure) is not None and curr_counts[index] > int(global_limit[measure]))
         if limit_crossed:
             return True
 
         # Check if METHOD level rate limit has crossed
         for index, measure in enumerate(self.MEASURE_UNIT, 5):
             if not limit_crossed:
-                limit_crossed = (method_spec_limit.get(measure) is not None and curr_counts[index] > method_spec_limit[measure])
+                limit_crossed = (method_spec_limit.get(measure) is not None and curr_counts[index] > int(method_spec_limit[measure]))
         if limit_crossed:
             return True
 
         # Check if API level rate limit has crossed
         for index, measure in enumerate(self.MEASURE_UNIT, 10):
             if not limit_crossed:
-                limit_crossed = (api_spec_limit.get(measure) is not None and curr_counts[index] > api_spec_limit[measure])
+                limit_crossed = (api_spec_limit.get(measure) is not None and curr_counts[index] > int(api_spec_limit[measure]))
         if limit_crossed:
             return True
 
@@ -135,12 +135,13 @@ class RateLimitPolicy:
 
     def check_policy(self, client_id, http_method, url):
         # Current timestamp in micro-second,
-        curr_timestamp = datetime.now().timestamp() * self.MICRO_SECONDS
+        curr_timestamp = int(datetime.now().timestamp() * self.MICRO_SECONDS)
         limit_crossed = self.check_rate_limit_violation(client_id, http_method, url, curr_timestamp)
         return bool(limit_crossed)
 
     def load_policy_in_redis(self):
         from rate_limit.models import ClientRateLimitConfig
+        import pdb; pdb.set_trace()
         configs = ClientRateLimitConfig.fetch_all_config()
         pipe = self.r_ins.pipeline()
         for client_id, client_conf in configs.items():
