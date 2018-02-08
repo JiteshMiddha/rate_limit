@@ -1,37 +1,32 @@
-# dist_rate_limit
-This is a Django project setup that includes a middleware for Distributed Rate Limiting.
-The core logic of Rate-limiting is written in 
-`rate_limit.middleware.request_rate_limit.RequestRateLimitingMiddleware` and  
-`rate_limit.middleware.rate_limit_policy.RateLimitPolicy`
+# Synopsis
+ - Distributed-Rate-Limiting in Django App
+A basic Django project setup to illustrate Distributed-Rate-Limiting using Django-middleware.
+The core components include a middleware and a RateLimitPolicyChecker  
+```
+rate_limit.middleware.request_rate_limit.RequestRateLimitingMiddleware
+rate_limit.middleware.rate_limit_policy.RateLimitPolicy
+```
 
 This middleware and policy can be used by any Distributed django app.  
 
-# Setup
-1. Clone the git repo `git clone https://github.com/sk902/rate_limit.git`
-2. Setup virtualenv for django project. `virtualenv -p <python-3-path> <venv-name>`
+## Getting started
+1. Setup virtualenv for a django project. `virtualenv -p python3 <venv-name>`
+2. Clone the git repo `git clone https://github.com/sk902/rate_limit.git`
 3. Install required packages in the virtualenv, using `pip install -r requirements.txt`
+4. Once setup is ready. Load sample Rate-limit configuration
+	 ```
+	 from rate_limit.script import create_sample_rate_limit_config_in_db, load_policy_in_redis
+	 # Create Sample Rate-limit policy in DB (Postgres, in this instance)  
+	 create_sample_rate_limit_config_in_db()
+	 # Load the policy from DB to redis
+	 load_policy_in_redis()	 
+	 ```
 
-## Sample configuration load
-1. Load sample rate-limit-configuration in DB (Postgres)
- ```
- from rate_limit.script import create_sample_rate_limit_config_in_db, load_policy_in_redis
- create_sample_rate_limit_config_in_db()
- ```
+## Rate Limiting configuration for a client
+For a client, Rate Limiting policy can be at multiple levels viz. Global-limit, Limit-at-Specialization-levels  (e.g. HTTP-METHOD / API-ENDPOINT).
+And for each level, there can be multiple time-windows among `SEC, MIN, HOUR, WEEK, MONTH` 
 
-2. Fetch the configuration from Postgres, format it then load it in redis.
- ```
- load_policy_in_redis()
- ```
-
-# How It works
-It uses Redis for managing the rate-limit. This redis db is pointed by all apps in the 
-distributed setting. 
-
-The PolicyChecker uses `Sliding Window Algorithm` to check for rate-limit crossing for any defined time-window. The time-window can be one or more among `SEC, MIN, HOUR, WEEK, MONTH` 
-For a client, there can be policy at multiple levels viz. Global-limit, Limit-at-Specialization-levels 
-(e.g. HTTP-METHOD / API-ENDPOINT):
-
-Rate-limit Config for individual client
+e.g
 ```
 	client: <CLIENT-ID>
 	limit:
@@ -72,14 +67,19 @@ Rate-limit Config for individual client
 					WEEK -> int (Optional)
 					MONTH  -> int (Optional)
 ```
-The configuration for each client is loaded in the redis with appropriate key.
 
-Every request must have `HTTP_AUTHORIZATION=<client_id>` in http-header.
+## Implementation Logic
+It uses Redis for rate-limiting requests from client. 
+All apps/services in the distributed cluster points to same redis DB. 
 
-If client_id is NULL or if there is no rate-limit configured for given client_id, 
-then response for Unauthorized request `{"code": 403 , "message": "Forbidden"}` will be sent. 
-If request crosses the configured RateLimit, 
-response for TOO_MANY_REQUESTS `{"code": 429, "message": "Rate limit exceeded"}` will be sent
+The Policy Checker uses `Sliding Window Algorithm` to check for rate-limit overflow 
+at different levels and time-windows.  
 
-If request passes the rate-limit check, the request will be passed forward
- for further processing. 
+Every request coming from client must have `HTTP_AUTHORIZATION=<client_id>` in http-header.
+Response will be as follows:
+1. API will return "UnAuthorizedRequest" if client_id is NULL or 
+ if there is no rate-limit configured for given client_id.
+ `{"code": 403 , "message": "Forbidden"}`
+2. If request crosses the configured RateLimit, it will return TOO_MANY_REQUESTS.
+ `{"code": 429, "message": "Rate limit exceeded"}`
+3. If request passes the rate-limit check, the request will be passed forward for further processing.
