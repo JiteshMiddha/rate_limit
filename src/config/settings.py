@@ -41,7 +41,6 @@ INSTALLED_APPS_CORE = [
 
 INSTALLED_APPS_3RD_PARTY = [
     'django_extensions',
-    'redis_sessions'
 ]
 
 INSTALLED_APPS_CUSTOM = [
@@ -55,7 +54,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
-    'config.middleware.request_rate_limit.RequestRateLimitingMiddleware',
+    'rate_limit.middleware.request_rate_limit.RequestRateLimitingMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -97,24 +96,31 @@ DATABASES = {
     },
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'redis_cache.RedisCache',
-        'LOCATION': "127.0.0.1:6379",
-        'TIMEOUT': None,
-        'OPTIONS': {
-            'DB': 1,
-            'PARSER_CLASS': 'redis.connection.HiredisParser',
-            'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
-            'CONNECTION_POOL_CLASS_KWARGS': {
-                'max_connections': 50,
-                'timeout': 20,
-            },
-            'MAX_CONNECTIONS': 1000,
-            'PICKLE_VERSION': -1,
-        },
-    }
+REDIS_RATE_LIMIT_DB = 1
+
+REDIS_CRED = {
+    'HOST': "127.0.0.1:6379",
+    'PORT': 6379
 }
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'redis_cache.RedisCache',
+#         'LOCATION': "127.0.0.1:6379",
+#         'TIMEOUT': None,
+#         'OPTIONS': {
+#             'DB': 1,
+#             'PARSER_CLASS': 'redis.connection.HiredisParser',
+#             'CONNECTION_POOL_CLASS': 'redis.BlockingConnectionPool',
+#             'CONNECTION_POOL_CLASS_KWARGS': {
+#                 'max_connections': 50,
+#                 'timeout': 20,
+#             },
+#             'MAX_CONNECTIONS': 1000,
+#             'PICKLE_VERSION': -1,
+#         },
+#     }
+# }
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
@@ -139,7 +145,7 @@ CACHES = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
